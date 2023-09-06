@@ -4,8 +4,9 @@ from dotenv import load_dotenv
 from flask import Flask, render_template, request, flash, redirect, session, g
 from flask_debugtoolbar import DebugToolbarExtension
 from sqlalchemy.exc import IntegrityError
+from werkzeug.exceptions import Unauthorized
 
-from forms import UserAddForm, LoginForm, MessageForm
+from forms import UserAddForm, LoginForm, MessageForm, CSRFProtectForm
 from models import db, connect_db, User, Message
 
 load_dotenv()
@@ -115,10 +116,20 @@ def login():
 def logout():
     """Handle logout of user and redirect to homepage."""
 
-    form = g.csrf_form
+    form = CSRFProtectForm()
 
-    # IMPLEMENT THIS AND FIX BUG
-    # DO NOT CHANGE METHOD ON ROUTE
+    # TODO: research:
+    # form = g.csrf_form()
+
+    if form.validate_on_submit():
+        do_logout()
+
+        flash("Successfully Logged out.")
+        return redirect("/login")
+
+    else:
+        raise Unauthorized()
+
 
 
 ##############################################################################
@@ -130,7 +141,7 @@ def list_users():
 
     Can take a 'q' param in querystring to search by that username.
     """
-
+    breakpoint()
     if not g.user:
         flash("Access unauthorized.", "danger")
         return redirect("/")
@@ -313,6 +324,8 @@ def homepage():
     - logged in: 100 most recent messages of self & followed_users
     """
 
+    form = CSRFProtectForm()
+
     if g.user:
         messages = (Message
                     .query
@@ -320,7 +333,7 @@ def homepage():
                     .limit(100)
                     .all())
 
-        return render_template('home.html', messages=messages)
+        return render_template('home.html', messages=messages, form=form)
 
     else:
         return render_template('home-anon.html')
