@@ -49,3 +49,6 @@ class LoginForm(FlaskForm):
 
 class CSRFProtectForm(FlaskForm):
     """Form for CSRF protection."""
+
+
+# class UserEditForm()

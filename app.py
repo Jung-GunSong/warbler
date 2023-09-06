@@ -17,7 +17,7 @@ app = Flask(__name__)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
 app.config['SQLALCHEMY_ECHO'] = False
-app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = True
+app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
 app.config['SECRET_KEY'] = os.environ['SECRET_KEY']
 toolbar = DebugToolbarExtension(app)
 
@@ -40,8 +40,8 @@ def add_user_to_g():
 
 @app.before_request
 def set_CSRF_to_g():
-
     """ adds a global property to access the CSRFProtectForm"""
+
     g.csrf_form = CSRFProtectForm()
 
 def do_login(user):
@@ -121,7 +121,6 @@ def login():
 def logout():
     """Handle logout of user and redirect to homepage."""
 
-
     if g.csrf_form.validate_on_submit():
         do_logout()
 
@@ -142,7 +141,7 @@ def list_users():
 
     Can take a 'q' param in querystring to search by that username.
     """
-    breakpoint()
+
     if not g.user:
         flash("Access unauthorized.", "danger")
         return redirect("/")
@@ -198,7 +197,7 @@ def show_followers(user_id):
 def start_following(follow_id):
     """Add a follow for the currently-logged-in user.
 
-    Redirect to following page for the current for the current user.
+    Redirect to following page for the current user.
     """
 
     if not g.user:
@@ -216,7 +215,7 @@ def start_following(follow_id):
 def stop_following(follow_id):
     """Have currently-logged-in-user stop following this user.
 
-    Redirect to following page for the current for the current user.
+    Redirect to following page for the current user.
     """
 
     if not g.user:
@@ -234,7 +233,11 @@ def stop_following(follow_id):
 def profile():
     """Update profile for current user."""
 
-    # IMPLEMENT THIS
+    # if not g.user:
+    #     flash("Access unauthorized.", "danger")
+    #     return redirect("/")
+
+
 
 
 @app.post('/users/delete')
