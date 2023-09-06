@@ -243,19 +243,11 @@ def profile():
     if form.validate_on_submit():
 
         username = form.username.data
-        # email = form.email.data
-        # image_url = form.image_url.data
-        # header_image_url = form.header_image_url.data
-        # bio = form.bio.data
         password = form.password.data
 
         user = User.authenticate(username = g.user.username, password = password)
-        # print("XXXXXXXXX user ", user)
-        # print("XXXXXXXXX image_url ", type(image_url))
-        # print("XXXXXXXXX header_image_url ", type(header_image_url))
+
         if user:
-            # do_login(user)
-            # flash(f"Hello, {user.username}!", "success")
             user.username = username
             user.email = form.email.data
             user.image_url = form.image_url.data or DEFAULT_IMAGE_URL
@@ -361,14 +353,16 @@ def homepage():
     - logged in: 100 most recent messages of self & followed_users
     """
 
+    user_ids = [user.id for user in g.user.following]
+    user_ids.append(g.user.id)
 
     if g.user:
         messages = (Message
                     .query
+                    .filter(Message.user_id.in_(user_ids))
                     .order_by(Message.timestamp.desc())
                     .limit(100)
                     .all())
-
         return render_template('home.html', messages=messages)
 
     else:
