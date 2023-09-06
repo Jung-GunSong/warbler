@@ -38,6 +38,11 @@ def add_user_to_g():
     else:
         g.user = None
 
+@app.before_request
+def set_CSRF_to_g():
+
+    """ adds a global property to access the CSRFProtectForm"""
+    g.csrf_form = CSRFProtectForm()
 
 def do_login(user):
     """Log in user."""
@@ -116,12 +121,8 @@ def login():
 def logout():
     """Handle logout of user and redirect to homepage."""
 
-    form = CSRFProtectForm()
 
-    # TODO: research:
-    # form = g.csrf_form()
-
-    if form.validate_on_submit():
+    if g.csrf_form.validate_on_submit():
         do_logout()
 
         flash("Successfully Logged out.")
@@ -324,7 +325,6 @@ def homepage():
     - logged in: 100 most recent messages of self & followed_users
     """
 
-    form = CSRFProtectForm()
 
     if g.user:
         messages = (Message
@@ -333,7 +333,7 @@ def homepage():
                     .limit(100)
                     .all())
 
-        return render_template('home.html', messages=messages, form=form)
+        return render_template('home.html', messages=messages)
 
     else:
         return render_template('home-anon.html')
