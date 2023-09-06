@@ -6,8 +6,8 @@ from flask_debugtoolbar import DebugToolbarExtension
 from sqlalchemy.exc import IntegrityError
 from werkzeug.exceptions import Unauthorized
 
-from forms import UserAddForm, LoginForm, MessageForm, CSRFProtectForm
-from models import db, connect_db, User, Message
+from forms import UserAddForm, LoginForm, MessageForm, CSRFProtectForm, UserEditForm
+from models import db, connect_db, User, Message, DEFAULT_IMAGE_URL, DEFAULT_HEADER_IMAGE_URL
 
 load_dotenv()
 
@@ -233,9 +233,42 @@ def stop_following(follow_id):
 def profile():
     """Update profile for current user."""
 
-    # if not g.user:
-    #     flash("Access unauthorized.", "danger")
-    #     return redirect("/")
+    if not g.user:
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
+
+    form = UserEditForm(obj = g.user)
+
+
+    if form.validate_on_submit():
+
+        username = form.username.data
+        # email = form.email.data
+        # image_url = form.image_url.data
+        # header_image_url = form.header_image_url.data
+        # bio = form.bio.data
+        password = form.password.data
+
+        user = User.authenticate(username = g.user.username, password = password)
+        # print("XXXXXXXXX user ", user)
+        # print("XXXXXXXXX image_url ", type(image_url))
+        # print("XXXXXXXXX header_image_url ", type(header_image_url))
+        if user:
+            # do_login(user)
+            # flash(f"Hello, {user.username}!", "success")
+            user.username = username
+            user.email = form.email.data
+            user.image_url = form.image_url.data or DEFAULT_IMAGE_URL
+            user.header_image_url = form.header_image_url.data or DEFAULT_HEADER_IMAGE_URL
+            user.bio = form.bio.data
+            user.location = form.location.data
+
+            db.session.commit()
+            return redirect(f"/users/{user.id}")
+
+        flash("Invalid credentials.", 'danger')
+
+    return render_template('users/edit.html', form=form)
 
 
 
