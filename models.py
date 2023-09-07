@@ -187,7 +187,7 @@ class Message(db.Model):
 
     def is_liked_already(self, user):
         """Is this messaged liked by user? Returns True/False"""
-        # TODO: revisit - if not self.user_id == user.id
+# TODO: could do if self in user.likes
         if self.id in [message.id for message in user.likes]:
             return True
 

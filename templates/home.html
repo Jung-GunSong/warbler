@@ -55,6 +55,8 @@
             <span class="text-muted">{{ msg.timestamp.strftime('%d %B %Y') }}</span>
 
             <!-- LOGIC TO RENDER STARS -->
+            <!-- TODO: option 1: request object (REFER) - the link I came from... control for refer being None. -->
+            <!-- option 2: form."came from". hidden field that you came from -->
             {% if not msg.user_id == g.user.id %}
             {% if msg.is_liked_already(g.user) %}
             <div>

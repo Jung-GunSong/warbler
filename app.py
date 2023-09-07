@@ -353,7 +353,8 @@ def delete_message(message_id):
 
 ###### LIKE/UNLIKE ON HOMEPAGE ######
 
-
+# TODO: functional decomposition. toggle the like/unlike using one route
+#
 @app.post('/messages/<int:id>/unlike/homepage')
 def unlike_message_homepage(id):
     """Unlike a warble that is already liked.
