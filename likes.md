@@ -8,7 +8,7 @@ message.likes - bring up all users who liked it
 instance method under Message instead
 
 
-If not message.user_id == g.user.id, then add "" and
+If not message.user_id == g.user.id AND
 if current message.id in [message.id for message in g.user.likes], then add full star
 
 (this is in html)

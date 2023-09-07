@@ -97,6 +97,9 @@ class User(db.Model):
         backref="following",
     )
 
+    likes = db.relationship('Message', secondary='likes', backref='liked_by')
+
+
     def __repr__(self):
         return f"<User #{self.id}: {self.username}, {self.email}>"
 
@@ -181,6 +184,37 @@ class Message(db.Model):
         db.ForeignKey('users.id', ondelete='CASCADE'),
         nullable=False,
     )
+
+    def is_liked_already(self, user):
+        """Is this messaged liked by user? Returns True/False"""
+        # TODO: revisit - if not self.user_id == user.id
+        if self.id in [message.id for message in user.likes]:
+            return True
+
+        return False
+
+
+
+class Like(db.Model):
+    """Likes table to join users to messages."""
+
+    __tablename__ = 'likes'
+
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey('users.id', ondelete='CASCADE'),
+        nullable=False,
+        primary_key=True,
+    )
+
+    message_id = db.Column(
+        db.Integer,
+        db.ForeignKey('messages.id', ondelete='CASCADE'),
+        nullable=False,
+        primary_key=True,
+    )
+
+
 
 
 def connect_db(app):
