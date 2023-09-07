@@ -3,12 +3,8 @@
 {% block content %}
 
 <div id="warbler-hero"
-     class="full-width">
-<!-- FIXME: positioning of image -->
-     <img src="{{ user.header_image_url }}"
-     alt="Header image for {{ user.username }}"
      class="full-width"
-     id="header-image">
+     style="background-image: url('{{ user.header_image_url }}')">
 
 </div>
 <img src="{{ user.image_url }}"
@@ -58,6 +54,7 @@
               Edit Profile
             </a>
             <form method="POST" action="/users/delete">
+              {{ g.csrf_form.hidden_tag() }}
               <button class="btn btn-outline-danger ms-2">
                 Delete Profile
               </button>

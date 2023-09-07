@@ -39,7 +39,7 @@ def add_user_to_g():
         g.user = None
 
 @app.before_request
-def set_CSRF_to_g():
+def add_CSRF_to_g():
     """ adds a global property to access the CSRFProtectForm"""
 
     g.csrf_form = CSRFProtectForm()
@@ -199,7 +199,7 @@ def start_following(follow_id):
 
     Redirect to following page for the current user.
     """
-
+    # TODO: add CSRF protection add with if not g.user
     if not g.user:
         flash("Access unauthorized.", "danger")
         return redirect("/")
@@ -217,7 +217,7 @@ def stop_following(follow_id):
 
     Redirect to following page for the current user.
     """
-
+    # TODO: add CSRF protection add with if not g.user
     if not g.user:
         flash("Access unauthorized.", "danger")
         return redirect("/")
@@ -246,8 +246,9 @@ def profile():
         password = form.password.data
 
         user = User.authenticate(username = g.user.username, password = password)
-
+        # TODO: tighten up: between first and second if
         if user:
+
             user.username = username
             user.email = form.email.data
             user.image_url = form.image_url.data or DEFAULT_IMAGE_URL
@@ -257,6 +258,7 @@ def profile():
 
             db.session.commit()
             return redirect(f"/users/{user.id}")
+
 
         flash("Invalid credentials.", 'danger')
 
@@ -276,12 +278,15 @@ def delete_user():
         flash("Access unauthorized.", "danger")
         return redirect("/")
 
-    do_logout()
+    if g.csrf_form.validate_on_submit():
+        do_logout()
+        for message in g.user.messages:
+            db.session.delete(message)
 
-    db.session.delete(g.user)
-    db.session.commit()
-
-    return redirect("/signup")
+        db.session.delete(g.user)
+        db.session.commit()
+        flash("User Successfully Deleted!")
+        return redirect("/signup")
 
 
 ##############################################################################
@@ -334,11 +339,13 @@ def delete_message(message_id):
         flash("Access unauthorized.", "danger")
         return redirect("/")
 
-    msg = Message.query.get_or_404(message_id)
-    db.session.delete(msg)
-    db.session.commit()
+    if g.csrf_form.validate_on_submit():
 
-    return redirect(f"/users/{g.user.id}")
+        msg = Message.query.get_or_404(message_id)
+        db.session.delete(msg)
+        db.session.commit()
+        flash("Message Successfully Deleted!")
+        return redirect(f"/users/{g.user.id}")
 
 
 ##############################################################################
@@ -352,11 +359,11 @@ def homepage():
     - anon users: no messages
     - logged in: 100 most recent messages of self & followed_users
     """
-
-    user_ids = [user.id for user in g.user.following]
-    user_ids.append(g.user.id)
-
     if g.user:
+
+        user_ids = [user.id for user in g.user.following]
+        user_ids.append(g.user.id)
+
         messages = (Message
                     .query
                     .filter(Message.user_id.in_(user_ids))
@@ -376,3 +383,17 @@ def add_header(response):
     # https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control
     response.cache_control.no_store = True
     return response
+
+
+# try:
+            #     user.username = username
+            #     user.email = form.email.data
+            #     user.image_url = form.image_url.data or DEFAULT_IMAGE_URL
+            #     user.header_image_url = form.header_image_url.data or DEFAULT_HEADER_IMAGE_URL
+            #     user.bio = form.bio.data
+            #     user.location = form.location.data
+
+            #     db.session.commit()
+            #     return redirect(f"/users/{user.id}")
+
+            # except IntegrityError:

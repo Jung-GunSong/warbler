@@ -24,6 +24,7 @@
             {% if g.user.id == message.user.id %}
             <form method="POST"
                   action="/messages/{{ message.id }}/delete">
+                  {{ g.csrf_form.hidden_tag() }}
               <button class="btn btn-outline-danger">Delete</button>
             </form>
             {% elif g.user.is_following(message.user) %}
