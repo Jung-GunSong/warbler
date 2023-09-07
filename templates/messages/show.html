@@ -9,9 +9,7 @@
       <li class="list-group-item">
 
         <a href="{{ url_for('show_user', user_id=message.user.id) }}">
-          <img src="{{ message.user.image_url }}"
-               alt=""
-               class="timeline-image">
+          <img src="{{ message.user.image_url }}" alt="" class="timeline-image">
         </a>
 
         <div class="message-area">
@@ -19,24 +17,38 @@
             <a href="/users/{{ message.user.id }}">
               @{{ message.user.username }}
             </a>
-
+            {% if not message.user_id == g.user.id %}
+            {% if message.is_liked_already(g.user) %}
+            <div>
+              <form action="/messages/{{ message.id }}/unlike_message" method="POST">
+                {{ g.csrf_form.hidden_tag() }}
+                <a><button action="submit" class="btn"><i class="bi bi-star-fill"></i></button></a>
+              </form>
+            </div>
+            {% else%}
+            <div>
+              <form action="/messages/{{ message.id }}/like_message" method="POST">
+                {{ g.csrf_form.hidden_tag() }}
+                <a><button action="submit" class="btn"><i class="bi bi-star"></i></button></a>
+              </form>
+            </div>
+            {% endif %}
+            {% endif %}
             {% if g.user %}
+
             {% if g.user.id == message.user.id %}
-            <form method="POST"
-                  action="/messages/{{ message.id }}/delete">
-                  {{ g.csrf_form.hidden_tag() }}
+            <form method="POST" action="/messages/{{ message.id }}/delete">
+              {{ g.csrf_form.hidden_tag() }}
               <button class="btn btn-outline-danger">Delete</button>
             </form>
             {% elif g.user.is_following(message.user) %}
-            <form method="POST"
-                  action="/users/stop-following/{{ message.user.id }}">
-                  {{ g.csrf_form.hidden_tag() }}
+            <form method="POST" action="/users/stop-following/{{ message.user.id }}">
+              {{ g.csrf_form.hidden_tag() }}
               <button class="btn btn-primary">Unfollow</button>
             </form>
             {% else %}
-            <form method="POST"
-                  action="/users/follow/{{ message.user.id }}">
-                  {{ g.csrf_form.hidden_tag() }}
+            <form method="POST" action="/users/follow/{{ message.user.id }}">
+              {{ g.csrf_form.hidden_tag() }}
               <button class="btn btn-outline-primary btn-sm">
                 Follow
               </button>
@@ -46,8 +58,8 @@
           </div>
           <p class="single-message">{{ message.text }}</p>
           <span class="text-muted">
-              {{ message.timestamp.strftime('%d %B %Y') }}
-            </span>
+            {{ message.timestamp.strftime('%d %B %Y') }}
+          </span>
         </div>
       </li>
     </ul>
