@@ -339,9 +339,9 @@ def delete_message(message_id):
         return redirect(f"/users/{g.user.id}")
 
 
-@app.post('/messages/<int:id>/unlike"')
+@app.post('/messages/<int:id>/unlike')
 def unlike_message(id):
-    """Unlike a warbler that is already liked
+    """Unlike a warble that is already liked.
 
     Redirect to root page
     """
@@ -353,6 +353,25 @@ def unlike_message(id):
     message = Message.query.get_or_404(id)
 
     g.user.likes.remove(message)
+    db.session.commit()
+
+    return redirect("/")
+
+
+@app.post('/messages/<int:id>/like')
+def like_message(id):
+    """Like a warble.
+
+    Redirect to root page
+    """
+
+    if not g.user or not g.csrf_form.validate_on_submit():
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
+
+    message = Message.query.get_or_404(id)
+
+    g.user.likes.append(message)
     db.session.commit()
 
     return redirect("/")

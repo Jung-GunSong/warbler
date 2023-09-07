@@ -53,23 +53,23 @@
         <div class="message-area">
           <a href="/users/{{ msg.user.id }}">@{{ msg.user.username }}</a>
           <span class="text-muted">{{ msg.timestamp.strftime('%d %B %Y') }}</span>
-        {% if not msg.user_id == g.user.id %}
-        {% if msg.is_liked_already(g.user) %}
-        <div>
-          <form action="/messages/{{ msg.id }}/unlike" method="POST">
-            {{ g.csrf_form.hidden_tag() }}
-            <button>Liked</button>
-          </form>
-        </div>
-        {% else%}
-        <div>
-          <form action="/messages/{{ msg.id }}/like" method="POST">
-            {{ g.csrf_form.hidden_tag() }}
-            <button>Not Liked</button>
-          </form>
-        </div>
-        {% endif %}
-        {% endif %}
+          {% if not msg.user_id == g.user.id %}
+          {% if msg.is_liked_already(g.user) %}
+          <div>
+            <form action="/messages/{{ msg.id }}/unlike" method="POST">
+              {{ g.csrf_form.hidden_tag() }}
+              <a><button action="submit" class="btn"><i class="bi bi-star-fill"></i></button></a>
+            </form>
+          </div>
+          {% else%}
+          <div>
+            <form action="/messages/{{ msg.id }}/like" method="POST">
+              {{ g.csrf_form.hidden_tag() }}
+              <a><button action="submit" class="btn"><i class="bi bi-star"></i></button></a>
+            </form>
+          </div>
+          {% endif %}
+          {% endif %}
           <p>{{ msg.text }}</p>
         </div>
       </li>
