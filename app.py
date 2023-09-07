@@ -339,6 +339,25 @@ def delete_message(message_id):
         return redirect(f"/users/{g.user.id}")
 
 
+@app.post('/messages/<int:id>/unlike"')
+def unlike_message(id):
+    """Unlike a warbler that is already liked
+
+    Redirect to root page
+    """
+
+    if not g.user or not g.csrf_form.validate_on_submit():
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
+
+    message = Message.query.get_or_404(id)
+
+    g.user.likes.remove(message)
+    db.session.commit()
+
+    return redirect("/")
+
+
 ##############################################################################
 # Homepage and error pages
 
@@ -376,15 +395,3 @@ def add_header(response):
     return response
 
 
-# try:
-    #     user.username = username
-    #     user.email = form.email.data
-    #     user.image_url = form.image_url.data or DEFAULT_IMAGE_URL
-    #     user.header_image_url = form.header_image_url.data or DEFAULT_HEADER_IMAGE_URL
-    #     user.bio = form.bio.data
-    #     user.location = form.location.data
-
-    #     db.session.commit()
-    #     return redirect(f"/users/{user.id}")
-
-    # except IntegrityError:
