@@ -38,11 +38,13 @@ def add_user_to_g():
     else:
         g.user = None
 
+
 @app.before_request
 def add_CSRF_to_g():
     """ adds a global property to access the CSRFProtectForm"""
 
     g.csrf_form = CSRFProtectForm()
+
 
 def do_login(user):
     """Log in user."""
@@ -129,7 +131,6 @@ def logout():
 
     else:
         raise Unauthorized()
-
 
 
 ##############################################################################
@@ -237,34 +238,24 @@ def profile():
         flash("Access unauthorized.", "danger")
         return redirect("/")
 
-    form = UserEditForm(obj = g.user)
-
+    form = UserEditForm(obj=g.user)
 
     if form.validate_on_submit():
 
-        username = form.username.data
-        password = form.password.data
-
-        user = User.authenticate(username = g.user.username, password = password)
-        # TODO: tighten up: between first and second if
-        if user:
-
-            user.username = username
-            user.email = form.email.data
-            user.image_url = form.image_url.data or DEFAULT_IMAGE_URL
-            user.header_image_url = form.header_image_url.data or DEFAULT_HEADER_IMAGE_URL
-            user.bio = form.bio.data
-            user.location = form.location.data
+        if User.authenticate(username=g.user.username, password=form.password.data):
+            g.user.username = form.username.data
+            g.user.email = form.email.data
+            g.user.image_url = form.image_url.data or DEFAULT_IMAGE_URL
+            g.user.header_image_url = form.header_image_url.data or DEFAULT_HEADER_IMAGE_URL
+            g.user.bio = form.bio.data
+            g.user.location = form.location.data
 
             db.session.commit()
-            return redirect(f"/users/{user.id}")
-
+            return redirect(f"/users/{g.user.id}")
 
         flash("Invalid credentials.", 'danger')
 
     return render_template('users/edit.html', form=form)
-
-
 
 
 @app.post('/users/delete')
@@ -386,14 +377,14 @@ def add_header(response):
 
 
 # try:
-            #     user.username = username
-            #     user.email = form.email.data
-            #     user.image_url = form.image_url.data or DEFAULT_IMAGE_URL
-            #     user.header_image_url = form.header_image_url.data or DEFAULT_HEADER_IMAGE_URL
-            #     user.bio = form.bio.data
-            #     user.location = form.location.data
+    #     user.username = username
+    #     user.email = form.email.data
+    #     user.image_url = form.image_url.data or DEFAULT_IMAGE_URL
+    #     user.header_image_url = form.header_image_url.data or DEFAULT_HEADER_IMAGE_URL
+    #     user.bio = form.bio.data
+    #     user.location = form.location.data
 
-            #     db.session.commit()
-            #     return redirect(f"/users/{user.id}")
+    #     db.session.commit()
+    #     return redirect(f"/users/{user.id}")
 
-            # except IntegrityError:
+    # except IntegrityError:
