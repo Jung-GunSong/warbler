@@ -17,25 +17,27 @@
             <a href="/users/{{ message.user.id }}">
               @{{ message.user.username }}
             </a>
+            <!-- LOGIC TO RENDER STARS -->
             {% if not message.user_id == g.user.id %}
             {% if message.is_liked_already(g.user) %}
             <div>
-              <form action="/messages/{{ message.id }}/unlike_message" method="POST">
+              <form action="/messages/{{ message.id }}/unlike/message" method="POST">
                 {{ g.csrf_form.hidden_tag() }}
                 <a><button action="submit" class="btn"><i class="bi bi-star-fill"></i></button></a>
               </form>
             </div>
             {% else%}
             <div>
-              <form action="/messages/{{ message.id }}/like_message" method="POST">
+              <form action="/messages/{{ message.id }}/like/message" method="POST">
                 {{ g.csrf_form.hidden_tag() }}
                 <a><button action="submit" class="btn"><i class="bi bi-star"></i></button></a>
               </form>
             </div>
             {% endif %}
             {% endif %}
-            {% if g.user %}
+            <!-- END LOGIC TO RENDER STARS -->
 
+            {% if g.user %}
             {% if g.user.id == message.user.id %}
             <form method="POST" action="/messages/{{ message.id }}/delete">
               {{ g.csrf_form.hidden_tag() }}

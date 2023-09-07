@@ -6,32 +6,36 @@
   <ul class="list-group" id="messages">
     {% for msg in user.likes %}
     <li class="list-group-item">
-      <a href="/messages/{{ msg.id }}" class="message-link" />
-      <a href="/users/{{ msg.user.id }}">
-        <img src="{{ msg.user.image_url }}" alt="" class="timeline-image">
-      </a>
-      <div class="message-area">
-        <a href="/users/{{ msg.user.id }}">@{{ msg.user.username }}</a>
-        <span class="text-muted">{{ msg.timestamp.strftime('%d %B %Y') }}</span>
-        {% if not msg.user_id == g.user.id %}
-        {% if msg.is_liked_already(g.user) %}
-        <div>
-          <form action="/messages/{{ msg.id }}/unlike/{{ user.id }}" method="POST">
-            {{ g.csrf_form.hidden_tag() }}
-            <a><button action="submit" class="btn"><i class="bi bi-star-fill"></i></button></a>
-          </form>
+      <a href="/messages/{{ msg.id }}" class="message-link">
+        <a href="/users/{{ msg.user.id }}">
+          <img src="{{ msg.user.image_url }}" alt="" class="timeline-image">
+        </a>
+        <div class="message-area">
+          <a href="/users/{{ msg.user.id }}">@{{ msg.user.username }}</a>
+          <span class="text-muted">{{ msg.timestamp.strftime('%d %B %Y') }}</span>
+
+          <!-- LOGIC TO RENDER STARS -->
+          {% if not msg.user_id == g.user.id %}
+          {% if msg.is_liked_already(g.user) %}
+          <div>
+            <form action="/messages/{{ msg.id }}/unlike/{{ user.id }}/likes" method="POST">
+              {{ g.csrf_form.hidden_tag() }}
+              <a><button action="submit" class="btn"><i class="bi bi-star-fill"></i></button></a>
+            </form>
+          </div>
+          {% else%}
+          <div>
+            <form action="/messages/{{ msg.id }}/like/{{ user.id }}/likes" method="POST">
+              {{ g.csrf_form.hidden_tag() }}
+              <a><button action="submit" class="btn"><i class="bi bi-star"></i></button></a>
+            </form>
+          </div>
+          {% endif %}
+          {% endif %}
+          <!-- END LOGIC TO RENDER STARS -->
+
+          <p>{{ msg.text }}</p>
         </div>
-        {% else%}
-        <div>
-          <form action="/messages/{{ msg.id }}/like/{{ user.id }}" method="POST">
-            {{ g.csrf_form.hidden_tag() }}
-            <a><button action="submit" class="btn"><i class="bi bi-star"></i></button></a>
-          </form>
-        </div>
-        {% endif %}
-        {% endif %}
-        <p>{{ msg.text }}</p>
-      </div>
     </li>
     {% endfor %}
   </ul>
