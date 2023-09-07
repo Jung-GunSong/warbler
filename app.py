@@ -199,8 +199,8 @@ def start_following(follow_id):
 
     Redirect to following page for the current user.
     """
-    # TODO: add CSRF protection add with if not g.user
-    if not g.user:
+
+    if not g.user or not g.csrf_form.validate_on_submit():
         flash("Access unauthorized.", "danger")
         return redirect("/")
 
@@ -217,8 +217,8 @@ def stop_following(follow_id):
 
     Redirect to following page for the current user.
     """
-    # TODO: add CSRF protection add with if not g.user
-    if not g.user:
+
+    if not g.user or not g.csrf_form.validate_on_submit():
         flash("Access unauthorized.", "danger")
         return redirect("/")
 

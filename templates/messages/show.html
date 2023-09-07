@@ -30,11 +30,13 @@
             {% elif g.user.is_following(message.user) %}
             <form method="POST"
                   action="/users/stop-following/{{ message.user.id }}">
+                  {{ g.csrf_form.hidden_tag() }}
               <button class="btn btn-primary">Unfollow</button>
             </form>
             {% else %}
             <form method="POST"
                   action="/users/follow/{{ message.user.id }}">
+                  {{ g.csrf_form.hidden_tag() }}
               <button class="btn btn-outline-primary btn-sm">
                 Follow
               </button>

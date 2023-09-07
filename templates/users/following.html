@@ -4,7 +4,6 @@
   <div class="row">
 
     {% for followed_user in user.following %}
-     <!-- TODO: add CSRF token -->
     <div class="col-lg-4 col-md-6 col-12">
       <div class="card user-card">
         <div class="card-inner">
@@ -23,11 +22,13 @@
             {% if g.user.is_following(followed_user) %}
             <form method="POST"
                   action="/users/stop-following/{{ followed_user.id }}">
+                  {{ g.csrf_form.hidden_tag() }}
               <button class="btn btn-primary btn-sm">Unfollow</button>
             </form>
             {% else %}
             <form method="POST"
                   action="/users/follow/{{ followed_user.id }}">
+                  {{ g.csrf_form.hidden_tag() }}
               <button class="btn btn-outline-primary btn-sm">
                 Follow
               </button>
