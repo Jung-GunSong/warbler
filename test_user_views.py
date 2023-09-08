@@ -37,6 +37,7 @@ class UserBaseViewTestCase(TestCase):
         User.query.delete()
 
         u1 = User.signup("u1", "u1@email.com", "password", None)
+        u2 = User.signup("u2", "u2@email.com", "password", None)
         db.session.flush()
 
         m1 = Message(text="m1-text", user_id=u1.id)
@@ -44,6 +45,7 @@ class UserBaseViewTestCase(TestCase):
         db.session.commit()
 
         self.u1_id = u1.id
+        self.u2_id = u2.id
         self.m1_id = m1.id
 
         self.client = app.test_client()
@@ -64,9 +66,9 @@ class UserAddViewTestCase(UserBaseViewTestCase):
 
             Message.query.filter_by(text="Hello").one()
 
-    def test_default_when_not_logged_in(self):
-
+    def test_homepage_when_not_logged_in(self):
         """test to see if default homepage appears when logged out"""
+
         with self.client as c:
             resp = c.get("/")
             html = resp.get_data(as_text=True)
@@ -75,9 +77,8 @@ class UserAddViewTestCase(UserBaseViewTestCase):
             self.assertIn('<div class="home-hero">', html)
 
     def test_user_homepage_when_logged_in(self):
-
-        u1 = User.query.get(self.u1_id)
         """test to see if user will get custom homepage logged in"""
+
         with self.client as c:
             with c.session_transaction() as sess:
                 sess[CURR_USER_KEY] = self.u1_id
@@ -85,10 +86,57 @@ class UserAddViewTestCase(UserBaseViewTestCase):
         resp = c.get("/")
         html = resp.get_data(as_text=True)
 
+        u1 = User.query.get(self.u1_id)
+
         self.assertEqual(resp.status_code, 200)
         self.assertIn('<!-- User homepage -->', html)
         self.assertIn(f'<img src="{u1.image_url}"', html)
 
 
-        # <img src="{{ g.user.header_image_url }}"
-        # <img src="{{ g.user.image_url }}"
+    def test_other_follower_page_logged_in(self):
+        """Load someone else's follower page when logged in"""
+
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = self.u1_id
+
+        resp = c.get(f"/users/{self.u2_id}/followers")
+        html = resp.get_data(as_text=True)
+
+        u2 = User.query.get(self.u2_id)
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertNotIn(">Access unauthorized.</div>", html)
+        self.assertNotIn("""<a href="/users/profile"
+                         class="btn btn-outline-secondary">
+                         Edit Profile</a>""", html)
+        self.assertNotIn("""<button class="btn btn-outline-danger ms-2">
+                         Delete Profile
+                         </button>""", html)
+        self.assertIn(f'<img src="{u2.image_url}"', html)
+
+
+    def test_own_follower_page_logged_in(self):
+        """Load ownfollower page when logged in"""
+
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = self.u1_id
+
+        resp = c.get(f"/users/{self.u1_id}/followers")
+        html = resp.get_data(as_text=True)
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn(">Edit Profile</a>", html)
+        self.assertIn(">Delete Profile</button>", html)
+# FIXME:
+
+
+    def test_follower_page_logged_out(self):
+        """Load follower page when logged out"""
+
+        with self.client as c:
+            resp = c.get(f"/users/{self.u2_id}/followers")
+            html = resp.get_data(as_text=True)
+
+        self.assertIn(">Access unauthorized.</div>", html)

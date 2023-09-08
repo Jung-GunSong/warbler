@@ -88,6 +88,7 @@ class MessageAddViewTestCase(MessageBaseViewTestCase):
 
 
     def test_messages_on_homepage(self):
+        """View messages on homepage"""
 
         m1 = Message.query.get(self.m1_id)
 
