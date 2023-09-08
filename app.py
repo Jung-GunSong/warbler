@@ -355,11 +355,11 @@ def delete_message(message_id):
 
 # TODO: functional decomposition. toggle the like/unlike using one route
 #
-@app.post('/messages/<int:id>/unlike/homepage')
-def unlike_message_homepage(id):
-    """Unlike a warble that is already liked.
+@app.post('/messages/<int:id>/like_or_unlike')
+def like_or_unlike_message_homepage(id):
+    """Unlike or like a warble.
 
-    Redirect to root page
+    Redirect to previous url
     """
 
     if not g.user or not g.csrf_form.validate_on_submit():
@@ -368,153 +368,33 @@ def unlike_message_homepage(id):
 
     message = Message.query.get_or_404(id)
 
-    g.user.likes.remove(message)
+    if message in g.user.likes:
+        g.user.likes.remove(message)
+
+    else:
+        g.user.likes.append(message)
+
     db.session.commit()
-
-    return redirect("/")
-
-
-@app.post('/messages/<int:id>/like/homepage')
-def like_message_homepage(id):
-    """Like a warble.
-
-    Redirect to root page
-    """
-
-    if not g.user or not g.csrf_form.validate_on_submit():
-        flash("Access unauthorized.", "danger")
-        return redirect("/")
-
-    message = Message.query.get_or_404(id)
-
-    g.user.likes.append(message)
-    db.session.commit()
-
-    return redirect("/")
+    return redirect(f"{request.referrer}")
 
 
-###### LIKE/UNLIKE ON SPECIFIC MESSAGE PAGE ######
+# @app.post('/messages/<int:id>/like')
+# def like_message_homepage(id):
+#     """Like a warble.
 
+#     Redirect to root page
+#     """
 
-@app.post('/messages/<int:id>/unlike/message')
-def unlike_while_in_message(id):
-    """Unlike a warble that is liked.
+#     if not g.user or not g.csrf_form.validate_on_submit():
+#         flash("Access unauthorized.", "danger")
+#         return redirect("/")
 
-    Redirect to message
-    """
+#     message = Message.query.get_or_404(id)
 
-    if not g.user or not g.csrf_form.validate_on_submit():
-        flash("Access unauthorized.", "danger")
-        return redirect("/")
-
-    message = Message.query.get_or_404(id)
-
-    g.user.likes.remove(message)
-    db.session.commit()
-
-    return redirect(f"/messages/{id}")
-
-
-@app.post('/messages/<int:id>/like/message')
-def like_while_in_message(id):
-    """Like a warble that is unliked.
-
-    Redirect to message
-    """
-
-    if not g.user or not g.csrf_form.validate_on_submit():
-        flash("Access unauthorized.", "danger")
-        return redirect("/")
-
-    message = Message.query.get_or_404(id)
-
-    g.user.likes.append(message)
-    db.session.commit()
-
-    return redirect(f"/messages/{id}")
-
-
-###### LIKE/UNLIKE ON SPECIFIC USER'S LIKES PAGE ######
-
-
-@app.post('/messages/<int:id>/unlike/<int:user_id>/likes')
-def unlike_message_on_likes_profile(id, user_id):
-    """Unlike a warble that is on a user's likes page.
-
-    Redirect to likes page of that user
-    """
-
-    if not g.user or not g.csrf_form.validate_on_submit():
-        flash("Access unauthorized.", "danger")
-        return redirect("/")
-
-    message = Message.query.get_or_404(id)
-
-    g.user.likes.remove(message)
-    db.session.commit()
-
-    return redirect(f"/users/{user_id}/likes")
-
-
-@app.post('/messages/<int:id>/like/<int:user_id>/likes')
-def like_message_on_likes_profile(id, user_id):
-    """Like a warble that is on a user's likes page.
-
-    Redirect to likes page of that user
-    """
-
-    if not g.user or not g.csrf_form.validate_on_submit():
-        flash("Access unauthorized.", "danger")
-        return redirect("/")
-
-    message = Message.query.get_or_404(id)
-
-    g.user.likes.append(message)
-    db.session.commit()
-
-    return redirect(f"/users/{user_id}/likes")
-
-
-###### LIKE/UNLIKE ON SPECIFIC USER'S PAGE ######
-
-
-@app.post('/messages/<int:id>/unlike/<int:user_id>/profile')
-def unlike_message_on_profile(id, user_id):
-    """Unlike a warble that is on a user's profile page.
-
-    Redirect to user's profile page.
-    """
-
-
-    if not g.user or not g.csrf_form.validate_on_submit():
-        flash("Access unauthorized.", "danger")
-        return redirect("/")
-
-    message = Message.query.get_or_404(id)
-
-    g.user.likes.remove(message)
-    db.session.commit()
-
-    return redirect(f"/users/{user_id}")
-
-
-@app.post('/messages/<int:id>/like/<int:user_id>/profile')
-def like_message_on_profile(id, user_id):
-    """Like a warble that is on a user's profile page.
-
-    Redirect to user's profile page.
-    """
-
-    if not g.user or not g.csrf_form.validate_on_submit():
-        flash("Access unauthorized.", "danger")
-        return redirect("/")
-
-    message = Message.query.get_or_404(id)
-
-    g.user.likes.append(message)
-    db.session.commit()
-
-    return redirect(f"/users/{user_id}")
+#     g.user.likes.append(message)
+#     db.session.commit()
+#     # print("XXXXXXX g.csrf_form.came_from is ", g.csrf_form.came_from)
+#     return redirect(f"{request.referrer}")
 
 
 ##############################################################################

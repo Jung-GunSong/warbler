@@ -55,26 +55,22 @@
             <span class="text-muted">{{ msg.timestamp.strftime('%d %B %Y') }}</span>
 
             <!-- LOGIC TO RENDER STARS -->
-            <!-- TODO: option 1: request object (REFER) - the link I came from... control for refer being None. -->
-              <!-- request.url -->
+            <!-- TODO: option 1: request object (REFERer) - the link I came from... control for refer being None. -->
+            <!-- request.url -->
 
             <!-- option 2: form."came from". hidden field that you came from -->
             {% if not msg.user_id == g.user.id %}
-            {% if msg.is_liked_already(g.user) %}
             <div>
-              <form action="/messages/{{ msg.id }}/unlike/homepage" method="POST">
+              <form action="/messages/{{ msg.id }}/like_or_unlike" method="POST">
                 {{ g.csrf_form.hidden_tag() }}
+                {% if msg.is_liked_already(g.user) %}
                 <a><button action="submit" class="btn"><i class="bi bi-star-fill"></i></button></a>
-              </form>
-            </div>
-            {% else%}
-            <div>
-              <form action="/messages/{{ msg.id }}/like/homepage" method="POST">
-                {{ g.csrf_form.hidden_tag() }}
+                {% else%}
                 <a><button action="submit" class="btn"><i class="bi bi-star"></i></button></a>
+                {% endif %}
               </form>
             </div>
-            {% endif %}
+
             {% endif %}
             <!-- END LOGIC TO RENDER STARS -->
 
