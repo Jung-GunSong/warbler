@@ -129,14 +129,15 @@ class MessageModelTestCase(TestCase):
 
         try:
             m1 = Message.query.get(self.m1_id)
-            m1.text = "Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et mag"
+            m1.text = """Lorem ipsum dolor sit amet, consectetuer adipiscing
+                         elit. Aenean commodo ligula eget dolor. Aenean massa
+                         Cum sociis natoque penatibus et mag"""
+
             db.session.commit()
         except DataError:
             failure_from_too_much_text = True
 
         self.assertEqual(failure_from_too_much_text, True)
 
-
-# create with valid inputs / invalid inputs
-# test deleting a message?
-# editing message with valid inputs /invalid inputs
+    # def test_is_liked_already(self):
+    #     """test is_liked_already instance method"""
