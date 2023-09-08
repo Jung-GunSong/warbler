@@ -19,7 +19,7 @@ os.environ['DATABASE_URL'] = "postgresql:///warbler_test"
 
 # Now we can import app
 
-from app import app
+from app import app, IntegrityError
 
 # Create our tables (we do this here, so we only create the tables
 # once for all tests --- in each test, we'll delete the data
@@ -112,3 +112,59 @@ class UserModelTestCase(TestCase):
 
     def test_user_signup_invalid(self):
         """Test User.signup class method when inputs are invalid"""
+
+        try:
+            u3 = User.signup("u3", "u1@email.com", "password", None)
+            db.session.add(u3)
+            db.session.commit()
+
+        except IntegrityError:
+            failed_duplicate_email = True
+            db.session.rollback()
+
+        try:
+            u4 = User.signup("u1", "u4@email.com", "password", None)
+            db.session.add(u4)
+            db.session.commit()
+
+        except IntegrityError:
+            failed_duplicate_username = True
+            db.session.rollback()
+
+        try:
+            User.signup("u5")
+
+        except TypeError:
+            failed_missing_fields = True
+
+
+        self.assertEqual(failed_duplicate_email, True)
+        self.assertEqual(failed_duplicate_username, True)
+        self.assertEqual(failed_missing_fields, True)
+
+    def test_does_user_authenticate(self):
+
+        """tests to see if authenticate method returns correct user instance"""
+
+        u1 = User.query.get(self.u1_id)
+
+        u1_after_auth = User.authenticate(username= u1.username, password= "password")
+
+        self.assertIsInstance(u1_after_auth, User)
+        self.assertEqual(u1_after_auth.username, u1.username)
+        self.assertEqual(u1_after_auth.password, u1.password)
+        self.assertEqual(u1_after_auth.email, u1.email)
+
+
+    def test_authenticate_when_invalid(self):
+
+        """tests to see if authenticate method returns false for either
+        wrong username or wrong password"""
+
+        # readability?
+        invalid_username = User.authenticate(username= "safdsafds", password= "password")
+
+        invalid_password = User.authenticate(username= "u1", password= "password1")
+
+        self.assertEqual(invalid_username, False)
+        self.assertEqual(invalid_password, False)
