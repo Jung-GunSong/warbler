@@ -351,10 +351,9 @@ def delete_message(message_id):
         return redirect(f"/users/{g.user.id}")
 
 
-###### LIKE/UNLIKE ON HOMEPAGE ######
+##############################################################################
+# Like/Unlike
 
-# TODO: functional decomposition. toggle the like/unlike using one route
-#
 @app.post('/messages/<int:id>/like_or_unlike')
 def like_or_unlike_message_homepage(id):
     """Unlike or like a warble.
@@ -377,24 +376,6 @@ def like_or_unlike_message_homepage(id):
     db.session.commit()
     return redirect(f"{request.referrer}")
 
-
-# @app.post('/messages/<int:id>/like')
-# def like_message_homepage(id):
-#     """Like a warble.
-
-#     Redirect to root page
-#     """
-
-#     if not g.user or not g.csrf_form.validate_on_submit():
-#         flash("Access unauthorized.", "danger")
-#         return redirect("/")
-
-#     message = Message.query.get_or_404(id)
-
-#     g.user.likes.append(message)
-#     db.session.commit()
-#     # print("XXXXXXX g.csrf_form.came_from is ", g.csrf_form.came_from)
-#     return redirect(f"{request.referrer}")
 
 
 ##############################################################################

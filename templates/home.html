@@ -55,10 +55,7 @@
             <span class="text-muted">{{ msg.timestamp.strftime('%d %B %Y') }}</span>
 
             <!-- LOGIC TO RENDER STARS -->
-            <!-- TODO: option 1: request object (REFERer) - the link I came from... control for refer being None. -->
-            <!-- request.url -->
-
-            <!-- option 2: form."came from". hidden field that you came from -->
+            <!-- TODO: another option: form."came from". hidden field that you came from -->
             {% if not msg.user_id == g.user.id %}
             <div>
               <form action="/messages/{{ msg.id }}/like_or_unlike" method="POST">

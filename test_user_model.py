@@ -51,3 +51,64 @@ class UserModelTestCase(TestCase):
         # User should have no messages & no followers
         self.assertEqual(len(u1.messages), 0)
         self.assertEqual(len(u1.followers), 0)
+
+    def test_is_following(self):
+        """Does is_following detect when user1 IS following user2"""
+
+        follow = Follow(user_following_id=self.u1_id,
+                        user_being_followed_id=self.u2_id)
+
+        db.session.add(follow)
+        db.session.commit()
+
+        u1 = User.query.get(self.u1_id)
+        u2 = User.query.get(self.u2_id)
+
+        self.assertEqual(u1.is_following(u2), True)
+
+    def test_is_not_following(self):
+        """Does is_following detect when user1 is NOT following user2"""
+
+        u1 = User.query.get(self.u1_id)
+        u2 = User.query.get(self.u2_id)
+
+        self.assertEqual(u1.is_following(u2), False)
+
+    def test_is_followed_by(self):
+        """Does is_followed_by detect when user1 IS followed by user2"""
+
+        follow = Follow(user_following_id=self.u1_id,
+                user_being_followed_id=self.u2_id)
+
+        db.session.add(follow)
+        db.session.commit()
+
+        u1 = User.query.get(self.u1_id)
+        u2 = User.query.get(self.u2_id)
+
+        self.assertEqual(u2.is_followed_by(u1), True)
+
+    def test_is_not_followed_by(self):
+        """Does is_followed_by detect when user1 is NOT followed by user2"""
+
+        u1 = User.query.get(self.u1_id)
+        u2 = User.query.get(self.u2_id)
+
+        self.assertEqual(u2.is_followed_by(u1), False)
+
+    def test_user_signup_valid(self):
+        """Test User.signup class method when inputs are valid"""
+
+        u3 = User.signup("u3", "u3@email.com", "password", None)
+        db.session.add(u3)
+        db.session.commit()
+
+        # Test instance properties
+        self.assertIsInstance(u3, User)
+        self.assertEqual(u3.username, "u3")
+        self.assertEqual(u3.email, "u3@email.com")
+        self.assertNotEqual(u3.password, "password")
+        self.assertIn("$2b$12$", u3.password) # will fail when Bcrypt increments
+
+    def test_user_signup_invalid(self):
+        """Test User.signup class method when inputs are invalid"""
