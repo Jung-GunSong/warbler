@@ -3,10 +3,11 @@
 # run these tests like:
 #
 #    python -m unittest test_user_model.py
+import os
 
+os.environ['DATABASE_URL'] = "postgresql:///warbler_test"
 
 from app import app, IntegrityError
-import os
 from unittest import TestCase
 
 from models import db, User, Follow, Message, Like
@@ -16,7 +17,6 @@ from models import db, User, Follow, Message, Like
 # before we import our app, since that will have already
 # connected to the database
 
-os.environ['DATABASE_URL'] = "postgresql:///warbler_test"
 
 # Now we can import app
 

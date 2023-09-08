@@ -87,4 +87,19 @@ class MessageAddViewTestCase(MessageBaseViewTestCase):
             self.assertIn(f"/{self.m1_id}/", html)
 
 
-    def
+    def test_messages_on_homepage(self):
+
+        m1 = Message.query.get(self.m1_id)
+
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = self.u1_id
+
+            resp = c.get("/")
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn('<!-- messages are here! -->', html)
+            self.assertIn(f'<img src="{m1.user.image_url}"', html)
+
+
