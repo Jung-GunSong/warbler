@@ -3,8 +3,9 @@ from dotenv import load_dotenv
 
 from flask import Flask, render_template, request, flash, redirect, session, g
 from flask_debugtoolbar import DebugToolbarExtension
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError, DataError
 from werkzeug.exceptions import Unauthorized
+# from psycopg2 import
 
 from forms import UserAddForm, LoginForm, MessageForm, CSRFProtectForm, UserEditForm
 from models import db, connect_db, User, Message, DEFAULT_IMAGE_URL, DEFAULT_HEADER_IMAGE_URL

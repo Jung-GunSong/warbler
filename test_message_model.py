@@ -5,7 +5,7 @@
 #    python -m unittest test_user_model.py
 
 
-from app import app, IntegrityError
+from app import app, IntegrityError, DataError
 import os
 from unittest import TestCase
 
@@ -74,7 +74,67 @@ class MessageModelTestCase(TestCase):
         self.assertEqual(Message.query.count(), 3)
         self.assertIsInstance(m3, Message)
         self.assertEqual(m3.text, "Another message!")
-        self.assertEqual(m3.user.id, self.m1_id)
+        self.assertEqual(m3.user.id, self.u1_id)
+
+    def test_create_message_invalid(self):
+
+        """tests message creation with either no username or text"""
+
+        try:
+            message_with_no_user_id = Message(text="Another message!")
+            db.session.add(message_with_no_user_id)
+            db.session.commit()
+
+        except IntegrityError:
+            failure_from_no_user_id = True
+            db.session.rollback()
+
+        try:
+            message_with_no_text = Message(user_id=self.u1_id)
+            db.session.add(message_with_no_text)
+            db.session.commit()
+
+        except IntegrityError:
+            failure_from_no_text = True
+            db.session.rollback()
+
+        self.assertEqual(failure_from_no_user_id,True)
+        self.assertEqual(failure_from_no_text,True)
+
+    def test_deleting_message(self):
+
+        """tests message deletion"""
+
+        m1 = Message.query.get(self.m1_id)
+        db.session.delete(m1)
+        db.session.commit()
+
+        self.assertEqual(Message.query.count(), 1)
+        self.assertNotIn(m1, Message.query.all())
+
+    def test_edit_message_valid(self):
+
+        """test if message can be edited with valid inputs"""
+
+        m1 = Message.query.get(self.m1_id)
+        m1.text = "I'm a new message now!"
+        db.session.commit()
+
+        self.assertEqual(Message.query.get(self.m1_id).text,
+                         m1.text)
+
+    def test_edit_message_invalid(self):
+
+        """test if message can be edited with invalid inputs"""
+
+        try:
+            m1 = Message.query.get(self.m1_id)
+            m1.text = "Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et mag"
+            db.session.commit()
+        except DataError:
+            failure_from_too_much_text = True
+
+        self.assertEqual(failure_from_too_much_text, True)
 
 
 # create with valid inputs / invalid inputs
