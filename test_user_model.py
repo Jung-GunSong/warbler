@@ -5,10 +5,11 @@
 #    python -m unittest test_user_model.py
 
 
+from app import app, IntegrityError
 import os
 from unittest import TestCase
 
-from models import db, User, Message, Follow
+from models import db, User, Follow, Message, Like
 
 # BEFORE we import our app, let's set an environmental variable
 # to use a different database for tests (we need to do this
@@ -19,7 +20,6 @@ os.environ['DATABASE_URL'] = "postgresql:///warbler_test"
 
 # Now we can import app
 
-from app import app, IntegrityError
 
 # Create our tables (we do this here, so we only create the tables
 # once for all tests --- in each test, we'll delete the data
@@ -78,7 +78,7 @@ class UserModelTestCase(TestCase):
         """Does is_followed_by detect when user1 IS followed by user2"""
 
         follow = Follow(user_following_id=self.u1_id,
-                user_being_followed_id=self.u2_id)
+                        user_being_followed_id=self.u2_id)
 
         db.session.add(follow)
         db.session.commit()
@@ -108,7 +108,8 @@ class UserModelTestCase(TestCase):
         self.assertEqual(u3.username, "u3")
         self.assertEqual(u3.email, "u3@email.com")
         self.assertNotEqual(u3.password, "password")
-        self.assertIn("$2b$12$", u3.password) # will fail when Bcrypt increments
+        # will fail when Bcrypt increments
+        self.assertIn("$2b$12$", u3.password)
 
     def test_user_signup_invalid(self):
         """Test User.signup class method when inputs are invalid"""
@@ -137,34 +138,59 @@ class UserModelTestCase(TestCase):
         except TypeError:
             failed_missing_fields = True
 
-
         self.assertEqual(failed_duplicate_email, True)
         self.assertEqual(failed_duplicate_username, True)
         self.assertEqual(failed_missing_fields, True)
 
     def test_does_user_authenticate(self):
-
         """tests to see if authenticate method returns correct user instance"""
 
         u1 = User.query.get(self.u1_id)
 
-        u1_after_auth = User.authenticate(username= u1.username, password= "password")
+        u1_after_auth = User.authenticate(
+            username=u1.username, password="password")
 
         self.assertIsInstance(u1_after_auth, User)
         self.assertEqual(u1_after_auth.username, u1.username)
         self.assertEqual(u1_after_auth.password, u1.password)
         self.assertEqual(u1_after_auth.email, u1.email)
 
-
     def test_authenticate_when_invalid(self):
-
         """tests to see if authenticate method returns false for either
         wrong username or wrong password"""
 
         # readability?
-        invalid_username = User.authenticate(username= "safdsafds", password= "password")
+        invalid_username = User.authenticate(
+            username="safdsafds", password="password")
 
-        invalid_password = User.authenticate(username= "u1", password= "password1")
+        invalid_password = User.authenticate(
+            username="u1", password="password1")
 
         self.assertEqual(invalid_username, False)
         self.assertEqual(invalid_password, False)
+
+    def test_user_messages(self):
+        """Test user.messages for User relationship with Message"""
+
+        message = Message(text="Cool!", user_id=self.u1_id)
+        db.session.add(message)
+        db.session.commit()
+
+        u1 = User.query.get(self.u1_id)
+
+        self.assertEqual(len(u1.messages), 1)
+
+    def test_user_likes(self):
+        """Test user.likes for User relationsip with Like"""
+
+        message = Message(text="Cool!", user_id=self.u1_id)
+        db.session.add(message)
+        db.session.commit()
+
+        like = Like(user_id=self.u1_id, message_id=message.id)
+        db.session.add(like)
+        db.session.commit()
+
+        u1 = User.query.get(self.u1_id)
+
+        self.assertEqual(len(u1.likes), 1)
