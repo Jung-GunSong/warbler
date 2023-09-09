@@ -108,6 +108,9 @@ class UserAddViewTestCase(UserBaseViewTestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertNotIn(">Access unauthorized.</div>", html)
         self.assertIn(f'<img src="{u2.image_url}"', html)
+        self.assertIn('<!-- followers page -->', html)
+
+
 
 
     def test_own_follower_page_logged_in(self):
@@ -131,7 +134,9 @@ class UserAddViewTestCase(UserBaseViewTestCase):
         """Load follower page when logged out"""
 
         with self.client as c:
-            resp = c.get(f"/users/{self.u2_id}/followers")
+            resp = c.get(f"/users/{self.u2_id}/followers",
+                         follow_redirects = True)
             html = resp.get_data(as_text=True)
 
         self.assertIn(">Access unauthorized.</div>", html)
+
